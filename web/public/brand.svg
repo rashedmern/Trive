@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="lockupGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" />
+      <stop offset="100%" stop-color="#881337" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(10, 10) scale(0.16)">
+    <!-- Standalone Pin Mini -->
+    <path
+      d="M 256 470 C 220 398 116 268 116 182 A 140 140 0 1 1 396 182 C 396 268 292 398 256 470 Z"
+      fill="url(#lockupGrad)"
+    />
+    <circle cx="256" cy="182" r="68" fill="#FFFFFF" />
+  </g>
+  <text x="110" y="58" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="800" letter-spacing="3" fill="#0F172A">TRIVE</text>
+  <text x="112" y="80" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" letter-spacing="1.5" fill="#64748B">SMART FLEET &amp; LOGISTICS</text>
+</svg>
