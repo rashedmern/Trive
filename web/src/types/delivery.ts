@@ -24,6 +24,7 @@ export interface OrderSpec {
   service: string;
   receiver: string;
   address: string;
+  origin?: string;
   packageType: string;
   paymentMethod: string;
   handlingNote: string;

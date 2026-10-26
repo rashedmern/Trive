@@ -14,6 +14,7 @@ import {
 import type { Order } from "../types/delivery";
 import { fetchOrderDetailsFromDB } from "../db/parcels";
 import { SlideToConfirmWeb } from "../components/feedback/SlideToConfirmWeb";
+import { RoutingEngine } from "../engine/routing-engine";
 
 interface OrderDetailsScreenProps {
   orderId: string;
@@ -59,12 +60,15 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({
   const spec = order?.spec || {
     service: "Express Parcel",
     receiver: "Emily Carter",
+    origin: "Road 27, Dhanmondi, Dhaka",
     address: "2210 Coral Way, Apt 3C (Dhaka Hub)",
     packageType: "Express Parcel (1.8 kg)",
     paymentMethod: "Cash on Delivery (৳250)",
     handlingNote:
       "Please ensure the package is handled with care - fragile items inside.",
   };
+
+  const routeCalc = RoutingEngine.calculateRoute(spec.origin, spec.address);
 
   return (
     <div className="w-full px-6 py-6 space-y-6 text-left">
@@ -143,13 +147,17 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({
             </div>
 
             {/* Route snippet */}
-            <div className="pt-4 border-t border-emerald-900/10 flex items-center justify-between text-xs font-semibold text-emerald-950 relative z-10">
-              <span className="truncate max-w-[220px]">
-                To: {spec.address}
-              </span>
-              <span className="text-[11px] font-mono font-bold bg-white/80 px-3 py-1 rounded-full">
-                Dijkstra ETA: 10 min
-              </span>
+            <div className="pt-4 border-t border-emerald-900/10 space-y-1 text-xs font-semibold text-emerald-950 relative z-10">
+              <div className="flex justify-between items-center">
+                <span className="truncate max-w-[200px]">From: {spec.origin || routeCalc.originName}</span>
+                <span className="text-[11px] font-mono font-bold bg-white/80 px-2.5 py-0.5 rounded-full">
+                  ETA: {routeCalc.duration}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-[11px] text-emerald-900/80">
+                <span className="truncate max-w-[200px]">To: {spec.address}</span>
+                <span className="font-mono">{routeCalc.distance}</span>
+              </div>
             </div>
           </div>
 
@@ -183,9 +191,23 @@ export const OrderDetailsScreen: React.FC<OrderDetailsScreenProps> = ({
               </div>
 
               <div className="flex justify-between items-center py-3">
+                <span className="text-neutral-500 font-medium">Pickup Origin</span>
+                <span className="text-neutral-900 font-bold text-right max-w-sm">
+                  {spec.origin || routeCalc.originName}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-3">
                 <span className="text-neutral-500 font-medium">Delivery Destination</span>
                 <span className="text-neutral-900 font-bold text-right max-w-sm">
                   {spec.address}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-3">
+                <span className="text-neutral-500 font-medium">Dijkstra Route Distance</span>
+                <span className="text-emerald-600 font-mono font-bold">
+                  {routeCalc.distance} (~{routeCalc.duration})
                 </span>
               </div>
 

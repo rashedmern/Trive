@@ -50,6 +50,8 @@ interface DhakaLeafletMapProps {
   center?: [number, number];
   zoom?: number;
   height?: string;
+  originLabel?: string;
+  destinationLabel?: string;
   onMarkerClick?: (courier: NearbyCourier) => void;
 }
 
@@ -69,9 +71,11 @@ export const DhakaLeafletMap: React.FC<DhakaLeafletMapProps> = ({
   couriers = [],
   driverPosition,
   showAllCouriers = true,
-  center = [23.774, 90.395],
+  center,
   zoom = 13,
   height = "100%",
+  originLabel,
+  destinationLabel,
   onMarkerClick,
 }) => {
   const polylineCoords: [number, number][] = routePoints.map((p) => [
@@ -83,15 +87,22 @@ export const DhakaLeafletMap: React.FC<DhakaLeafletMapProps> = ({
   const destPoint =
     routePoints.length > 1 ? routePoints[routePoints.length - 1] : null;
 
+  // Auto-compute center based on origin & destination if not explicitly specified
+  const mapCenter: [number, number] = center || (
+    originPoint && destPoint
+      ? [(originPoint.latitude + destPoint.latitude) / 2, (originPoint.longitude + destPoint.longitude) / 2]
+      : [23.774, 90.395]
+  );
+
   return (
     <div style={{ height, width: "100%", position: "relative" }}>
       <MapContainer
-        center={center}
+        center={mapCenter}
         zoom={zoom}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", zIndex: 10 }}
       >
-        <ChangeMapView center={center} zoom={zoom} />
+        <ChangeMapView center={mapCenter} zoom={zoom} />
 
         {/* Free Standard OpenStreetMap Tiles - 100% open, zero API key required */}
         <TileLayer
@@ -136,7 +147,7 @@ export const DhakaLeafletMap: React.FC<DhakaLeafletMapProps> = ({
             <Popup>
               <div className="text-xs font-sans">
                 <p className="font-bold text-neutral-800">Pickup Location</p>
-                <p className="text-neutral-600">Road 27, Dhanmondi</p>
+                <p className="text-emerald-700 font-semibold">{originLabel || "Pickup Origin"}</p>
               </div>
             </Popup>
           </Marker>
@@ -151,7 +162,7 @@ export const DhakaLeafletMap: React.FC<DhakaLeafletMapProps> = ({
             <Popup>
               <div className="text-xs font-sans">
                 <p className="font-bold text-neutral-800">Delivery Destination</p>
-                <p className="text-neutral-600">2210 Coral Way / Gulshan 2</p>
+                <p className="text-[#FF2D55] font-semibold">{destinationLabel || "Delivery Address"}</p>
               </div>
             </Popup>
           </Marker>

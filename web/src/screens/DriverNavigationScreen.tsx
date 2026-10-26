@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { DhakaLeafletMap } from "../components/map/DhakaLeafletMap";
 import { RoutingEngine, RouteResult } from "../engine/routing-engine";
-import { updateParcelStatusInDB } from "../db/parcels";
+import { updateParcelStatusInDB, fetchOrderDetailsFromDB } from "../db/parcels";
 
 interface DriverNavigationScreenProps {
   orderId?: string;
@@ -34,10 +34,14 @@ export const DriverNavigationScreen: React.FC<DriverNavigationScreenProps> = ({
   const [isDone, setIsDone] = useState(false);
 
   useEffect(() => {
-    // Run Dijkstra Routing
-    const res = RoutingEngine.calculateRoute();
-    setRouteData(res);
-  }, []);
+    // Run Dynamic Dijkstra Routing for this specific order
+    fetchOrderDetailsFromDB(orderId).then((ord) => {
+      const origin = ord?.spec?.origin || "Road 27, Dhanmondi";
+      const dest = ord?.spec?.address || "2210 Coral Way, Gulshan 2";
+      const res = RoutingEngine.calculateRoute(origin, dest);
+      setRouteData(res);
+    });
+  }, [orderId]);
 
   const handleCompleteOrder = async () => {
     setIsCompleting(true);
@@ -105,8 +109,8 @@ export const DriverNavigationScreen: React.FC<DriverNavigationScreenProps> = ({
                   Immediate Turn
                 </span>
               </div>
-              <p className="text-xs font-semibold text-neutral-300 mt-0.5">
-                Turn right onto Mirpur Rd (1024 Ocean Dr)
+              <p className="text-xs font-semibold text-neutral-300 mt-0.5 truncate max-w-xs">
+                To: {routeData?.destName || "Delivery Address"}
               </p>
             </div>
           </div>
@@ -160,8 +164,8 @@ export const DriverNavigationScreen: React.FC<DriverNavigationScreenProps> = ({
           {/* Timeline Route Simulator Slider */}
           <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 space-y-2">
             <div className="flex justify-between text-xs font-bold text-neutral-700">
-              <span>Road 27 (Dhanmondi)</span>
-              <span>Gulshan 2 Destination</span>
+              <span className="truncate max-w-[170px]">{routeData?.originName || "Pickup Point"}</span>
+              <span className="truncate max-w-[170px] text-right">{routeData?.destName || "Destination"}</span>
             </div>
             <input
               type="range"
@@ -228,7 +232,9 @@ export const DriverNavigationScreen: React.FC<DriverNavigationScreenProps> = ({
           couriers={[]}
           driverPosition={activePosition}
           showAllCouriers={false}
-          zoom={14}
+          zoom={13}
+          originLabel={routeData?.originName}
+          destinationLabel={routeData?.destName}
         />
       </div>
     </div>

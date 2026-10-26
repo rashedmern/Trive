@@ -47,7 +47,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const couriers = RoutingEngine.getNearbyCouriers();
-  const route = RoutingEngine.calculateRoute();
+  const topParcel = activeParcels[0];
+  const route = RoutingEngine.calculateRoute(
+    topParcel?.origin || "Road 27, Dhanmondi, Dhaka",
+    topParcel?.destination || "2210 Coral Way, Apt 3C (Dhaka Hub)"
+  );
 
   const loadData = async () => {
     setIsLoading(true);
@@ -442,8 +446,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                 couriers={couriers}
                 showAllCouriers={true}
                 height="100%"
-                center={[23.774, 90.395]}
-                zoom={12}
+                originLabel={route.originName}
+                destinationLabel={route.destName}
                 onMarkerClick={(courier) => {
                   alert(`Courier: ${courier.name} (${courier.zoneName})\nRating: ★${courier.rating}\nETA: ${courier.etaMinutes} mins`);
                 }}
@@ -451,28 +455,28 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             </div>
 
             {/* Turn HUD & Route Summary Bar */}
-            <div className="p-4 bg-white border-t border-neutral-100 flex items-center justify-between">
+            <div className="p-4 bg-white border-t border-neutral-100 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-base">
+                <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-base shrink-0">
                   ↰
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900">
-                    <span>50 ft</span>
-                    <span className="text-neutral-300">•</span>
-                    <span className="text-[#FF2D55]">1024 Ocean Dr</span>
+                    <span className="truncate max-w-[140px] text-emerald-700">{route.originName}</span>
+                    <span className="text-neutral-300">➔</span>
+                    <span className="truncate max-w-[140px] text-[#FF2D55]">{route.destName}</span>
                   </div>
-                  <p className="text-[10px] text-neutral-400">
-                    Pass Russell Square toward Farmgate
+                  <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                    Dijkstra: {route.distance} (~{route.duration})
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={() => onSelectParcel("#F165G258")}
-                className="px-4 py-2 bg-[#FF2D55] hover:bg-[#e0264b] text-white rounded-xl text-xs font-bold shadow-md shadow-[#FF2D55]/20 transition-all cursor-pointer"
+                onClick={() => onSelectParcel(topParcel?.id || "#F165G258")}
+                className="px-4 py-2 bg-[#FF2D55] hover:bg-[#e0264b] text-white rounded-xl text-xs font-bold shadow-md shadow-[#FF2D55]/20 transition-all cursor-pointer shrink-0"
               >
-                Open GPS Shift
+                Track Live GPS
               </button>
             </div>
           </div>

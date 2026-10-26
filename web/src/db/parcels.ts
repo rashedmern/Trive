@@ -254,6 +254,7 @@ export async function fetchOrderDetailsFromDB(
       spec: {
         service: localMatch.serviceType || "Express Parcel",
         receiver: localMatch.receiverName || "Emily Carter",
+        origin: localMatch.origin || "Road 27, Dhanmondi, Dhaka",
         address: localMatch.destination || "2210 Coral Way, Apt 3C (Dhaka Hub)",
         packageType: `${localMatch.serviceType || "Express Parcel"} (${localMatch.weight || "1.5 kg"})`,
         paymentMethod: "Cash on Delivery (৳250)",
@@ -282,6 +283,7 @@ export async function fetchOrderDetailsFromDB(
           spec: {
             service: fallback.serviceType || "Express Parcel",
             receiver: fallback.receiverName || "Emily Carter",
+            origin: fallback.origin || "Road 27, Dhanmondi, Dhaka",
             address: fallback.destination || "2210 Coral Way, Apt 3C (Dhaka Hub)",
             packageType: `${fallback.serviceType || "Merchandise"} (${fallback.weight || "1.8 kg"})`,
             paymentMethod: "Cash on Delivery (৳250)",
@@ -301,6 +303,7 @@ export async function fetchOrderDetailsFromDB(
       spec: {
         service: row.package_type || "Express Parcel",
         receiver: row.receiver_name || "Emily Carter",
+        origin: row.pickup_address || "Road 27, Dhanmondi, Dhaka",
         address: row.delivery_address || "2210 Coral Way, Apt 3C (Dhaka Hub)",
         packageType: `${row.package_type || "Merchandise"} (${row.weight_kg ? `${row.weight_kg} kg` : "1.8 kg"})`,
         paymentMethod: "Cash on Delivery (৳250)",
