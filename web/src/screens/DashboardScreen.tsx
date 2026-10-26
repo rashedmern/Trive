@@ -29,6 +29,7 @@ interface DashboardScreenProps {
   onOpenSupport: () => void;
   onViewAllParcels: () => void;
   searchQuery?: string;
+  refreshTrigger?: number;
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({
@@ -39,6 +40,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onOpenSupport,
   onViewAllParcels,
   searchQuery = "",
+  refreshTrigger = 0,
 }) => {
   const [activeParcels, setActiveParcels] = useState<DeliveryItem[]>([]);
   const [historyParcels, setHistoryParcels] = useState<DeliveryItem[]>([]);
@@ -57,7 +59,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshTrigger]);
 
   const allParcels = [...activeParcels, ...historyParcels];
 

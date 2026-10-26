@@ -17,11 +17,13 @@ import { fetchParcelsFromDB } from "../db/parcels";
 interface ParcelsScreenProps {
   onSelectParcel: (parcelId: string) => void;
   onOpenCreate: () => void;
+  refreshTrigger?: number;
 }
 
 export const ParcelsScreen: React.FC<ParcelsScreenProps> = ({
   onSelectParcel,
   onOpenCreate,
+  refreshTrigger = 0,
 }) => {
   const [filter, setFilter] = useState<"all" | "active" | "delivered">("all");
   const [search, setSearch] = useState("");
@@ -39,7 +41,7 @@ export const ParcelsScreen: React.FC<ParcelsScreenProps> = ({
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshTrigger]);
 
   const allParcels = [...activeParcels, ...historyParcels];
 

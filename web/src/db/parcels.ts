@@ -11,6 +11,8 @@ export const FALLBACK_DELIVERIES: DeliveryItem[] = [
     destination: "2210 Coral Way, Apt 3C (Dhaka Hub)",
     weight: "1.8 kg",
     serviceType: "Express Parcel",
+    receiverName: "Emily Carter",
+    receiverPhone: "+880 1712-345678",
   },
   {
     id: "#CB1AD25",
@@ -21,6 +23,8 @@ export const FALLBACK_DELIVERIES: DeliveryItem[] = [
     destination: "1024 Ocean Dr, Suite 500",
     weight: "1.2 kg",
     serviceType: "Retail Merchandise",
+    receiverName: "Alex Morgan",
+    receiverPhone: "+880 1823-456789",
   },
   {
     id: "#CA19WS8",
@@ -31,6 +35,8 @@ export const FALLBACK_DELIVERIES: DeliveryItem[] = [
     destination: "742 Evergreen Terrace",
     weight: "4.8 kg",
     serviceType: "Standard Freight",
+    receiverName: "David Miller",
+    receiverPhone: "+880 1934-567890",
   },
 ];
 
@@ -44,6 +50,7 @@ export const FALLBACK_HISTORY: DeliveryItem[] = [
     destination: "2210 Coral Way, Apt 3C",
     weight: "0.8 kg",
     serviceType: "Same-Day Delivery",
+    receiverName: "Emily Carter",
   },
   {
     id: "#CA18WS8",
@@ -54,8 +61,30 @@ export const FALLBACK_HISTORY: DeliveryItem[] = [
     destination: "440 West Flagler St",
     weight: "3.1 kg",
     serviceType: "Standard Cargo",
+    receiverName: "Sarah Connor",
   },
 ];
+
+const LOCAL_STORAGE_KEY = "trive_local_parcels";
+
+function getLocalStoredParcels(): DeliveryItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalStoredParcels(parcels: DeliveryItem[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parcels));
+  } catch {
+    // quota exceeded fallback
+  }
+}
 
 interface SupabaseParcelRow {
   id: string;
@@ -81,45 +110,66 @@ export async function fetchParcelsFromDB(): Promise<{
   active: DeliveryItem[];
   history: DeliveryItem[];
 }> {
+  const localList = getLocalStoredParcels();
+
   try {
     const { data, error } = await supabase
       .from("parcels")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return {
-        active: FALLBACK_DELIVERIES,
-        history: FALLBACK_HISTORY,
-      };
+    let dbParcels: DeliveryItem[] = [];
+
+    if (!error && data && data.length > 0) {
+      dbParcels = (data as unknown as SupabaseParcelRow[]).map((row) => ({
+        id: row.id,
+        status: (row.status || "looking_for_courier") as DeliveryItem["status"],
+        arrivalTime: row.arrival_time || "Within 35 min",
+        cardColor: (row.card_color || "green") as DeliveryItem["cardColor"],
+        origin: row.pickup_address,
+        destination: row.delivery_address,
+        weight: row.weight_kg ? `${row.weight_kg} kg` : "1.5 kg",
+        serviceType: row.package_type || "Express Parcel",
+        receiverName: row.receiver_name,
+        receiverPhone: row.receiver_phone,
+      }));
     }
 
-    const allParcels: DeliveryItem[] = (
-      data as unknown as SupabaseParcelRow[]
-    ).map((row) => ({
-      id: row.id,
-      status: (row.status || "looking_for_courier") as DeliveryItem["status"],
-      arrivalTime: row.arrival_time || "Within 45 min",
-      cardColor: (row.card_color || "green") as DeliveryItem["cardColor"],
-      origin: row.pickup_address,
-      destination: row.delivery_address,
-      weight: row.weight_kg ? `${row.weight_kg} kg` : "1.5 kg",
-      serviceType: row.package_type || "Express Parcel",
-      receiverName: row.receiver_name,
-      receiverPhone: row.receiver_phone,
-    }));
+    // Merge: local custom parcels take top priority, followed by DB, followed by Fallback
+    const combinedMap = new Map<string, DeliveryItem>();
 
-    const active = allParcels.filter((p) => p.status !== "received");
-    const history = allParcels.filter((p) => p.status === "received");
+    // 1. First add local user-created parcels
+    localList.forEach((p) => combinedMap.set(p.id, p));
+
+    // 2. Add DB parcels
+    dbParcels.forEach((p) => {
+      if (!combinedMap.has(p.id)) combinedMap.set(p.id, p);
+    });
+
+    // 3. Add default fallbacks if not present
+    [...FALLBACK_DELIVERIES, ...FALLBACK_HISTORY].forEach((p) => {
+      if (!combinedMap.has(p.id)) combinedMap.set(p.id, p);
+    });
+
+    const all = Array.from(combinedMap.values());
+    const active = all.filter((p) => p.status !== "received");
+    const history = all.filter((p) => p.status === "received");
 
     return {
       active: active.length > 0 ? active : FALLBACK_DELIVERIES,
       history: history.length > 0 ? history : FALLBACK_HISTORY,
     };
   } catch {
+    const combinedMap = new Map<string, DeliveryItem>();
+    localList.forEach((p) => combinedMap.set(p.id, p));
+    [...FALLBACK_DELIVERIES, ...FALLBACK_HISTORY].forEach((p) => {
+      if (!combinedMap.has(p.id)) combinedMap.set(p.id, p);
+    });
+
+    const all = Array.from(combinedMap.values());
     return {
-      active: FALLBACK_DELIVERIES,
-      history: FALLBACK_HISTORY,
+      active: all.filter((p) => p.status !== "received"),
+      history: all.filter((p) => p.status === "received"),
     };
   }
 }
@@ -129,6 +179,12 @@ export async function insertParcelToDB(
   receiverName = "Emily Carter",
   receiverPhone = "+880 1700-000000"
 ): Promise<boolean> {
+  // 1. Immediately store in local store so it NEVER vanishes
+  const current = getLocalStoredParcels();
+  const updated = [parcel, ...current.filter((p) => p.id !== parcel.id)];
+  saveLocalStoredParcels(updated);
+
+  // 2. Also push to Supabase PostgreSQL database
   try {
     const row = {
       id: parcel.id,
@@ -137,7 +193,7 @@ export async function insertParcelToDB(
       pickup_address: parcel.origin || "Road 27, Dhanmondi, Dhaka",
       delivery_address: parcel.destination || "Road 103, Gulshan 2, Dhaka",
       status: parcel.status || "looking_for_courier",
-      arrival_time: parcel.arrivalTime || "Within 45 min",
+      arrival_time: parcel.arrivalTime || "Within 35 min",
       card_color: parcel.cardColor || "green",
       package_type: parcel.serviceType || "Express Parcel",
       weight_kg: 1.5,
@@ -148,13 +204,12 @@ export async function insertParcelToDB(
 
     const { error } = await supabase.from("parcels").insert([row]);
     if (error) {
-      console.warn("Supabase insert error:", error.message);
-      return false;
+      console.warn("Supabase insert error (fallback preserved):", error.message);
     }
     return true;
   } catch (err) {
-    console.warn("Supabase insert exception:", err);
-    return false;
+    console.warn("Supabase insert exception (fallback preserved):", err);
+    return true;
   }
 }
 
@@ -162,6 +217,14 @@ export async function updateParcelStatusInDB(
   id: string,
   newStatus: DeliveryItem["status"]
 ): Promise<boolean> {
+  // Update local store
+  const current = getLocalStoredParcels();
+  const found = current.find((p) => p.id === id);
+  if (found) {
+    found.status = newStatus;
+    saveLocalStoredParcels(current);
+  }
+
   try {
     const { error } = await supabase
       .from("parcels")
@@ -170,17 +233,36 @@ export async function updateParcelStatusInDB(
 
     if (error) {
       console.warn("Supabase update error:", error.message);
-      return false;
     }
     return true;
   } catch {
-    return false;
+    return true;
   }
 }
 
 export async function fetchOrderDetailsFromDB(
   id: string
 ): Promise<Order | null> {
+  // Check local store first
+  const localList = getLocalStoredParcels();
+  const localMatch = localList.find((p) => p.id === id);
+  if (localMatch) {
+    return {
+      trackingId: localMatch.id,
+      status: localMatch.status,
+      cardColor: localMatch.cardColor,
+      spec: {
+        service: localMatch.serviceType || "Express Parcel",
+        receiver: localMatch.receiverName || "Emily Carter",
+        address: localMatch.destination || "2210 Coral Way, Apt 3C (Dhaka Hub)",
+        packageType: `${localMatch.serviceType || "Express Parcel"} (${localMatch.weight || "1.5 kg"})`,
+        paymentMethod: "Cash on Delivery (৳250)",
+        handlingNote:
+          "Please ensure the package is handled with care - fragile items inside.",
+      },
+    };
+  }
+
   try {
     const { data, error } = await supabase
       .from("parcels")
@@ -199,7 +281,7 @@ export async function fetchOrderDetailsFromDB(
           cardColor: fallback.cardColor,
           spec: {
             service: fallback.serviceType || "Express Parcel",
-            receiver: "Emily Carter",
+            receiver: fallback.receiverName || "Emily Carter",
             address: fallback.destination || "2210 Coral Way, Apt 3C (Dhaka Hub)",
             packageType: `${fallback.serviceType || "Merchandise"} (${fallback.weight || "1.8 kg"})`,
             paymentMethod: "Cash on Delivery (৳250)",

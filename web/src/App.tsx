@@ -20,6 +20,7 @@ export const App: React.FC = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string>("#F165G258");
   const [globalSearch, setGlobalSearch] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -40,11 +41,13 @@ export const App: React.FC = () => {
   const handleDeliveryCompleted = () => {
     setActiveView("main");
     setActiveTab("dashboard");
+    setRefreshTrigger((k) => k + 1);
   };
 
   const handleParcelCreated = (_newParcel: DeliveryItem) => {
     setActiveTab("dashboard");
     setIsCreateOpen(false);
+    setRefreshTrigger((k) => k + 1);
   };
 
   const getPageTitle = () => {
@@ -120,6 +123,7 @@ export const App: React.FC = () => {
                   onOpenSupport={() => setIsSupportOpen(true)}
                   onViewAllParcels={() => setActiveTab("parcels")}
                   searchQuery={globalSearch}
+                  refreshTrigger={refreshTrigger}
                 />
               )}
 
@@ -127,6 +131,7 @@ export const App: React.FC = () => {
                 <ParcelsScreen
                   onSelectParcel={handleSelectParcel}
                   onOpenCreate={() => setIsCreateOpen(true)}
+                  refreshTrigger={refreshTrigger}
                 />
               )}
 
