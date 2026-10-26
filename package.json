@@ -51,6 +51,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "build": "npm run build --prefix web",
     "dev": "npm run dev --prefix web",
     "preview": "npm run preview --prefix web",
     "build:react": "npm run build --prefix web",
