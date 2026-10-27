@@ -115,19 +115,16 @@ export const DriverNavigationScreen: React.FC<DriverNavigationScreenProps> = ({
             </div>
           </div>
 
-          {/* Live DSA Metrics HUD (Screen 2 Spec) */}
+          {/* Live Navigation Engine HUD */}
           <div className="pt-3 border-t border-neutral-800 flex items-center justify-between text-[11px] font-mono text-neutral-300">
-            <div className="flex items-center gap-1">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Dijkstra:</span>
-              <span className="text-emerald-400 font-bold">
-                {routeData?.computeLatencyMs ?? 0.002}ms
-              </span>
+            <div className="flex items-center gap-1.5">
+              <Navigation className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Dijkstra Shortest Path</span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 text-emerald-400 font-bold">
               <Compass className="w-3.5 h-3.5 text-amber-400" />
-              <span>{routeData?.nodeCount || 8} Nodes</span>
+              <span>{routeData?.nodeCount || 8} Intersections</span>
             </div>
           </div>
         </div>

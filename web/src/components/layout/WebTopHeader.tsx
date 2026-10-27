@@ -2,10 +2,7 @@ import React from "react";
 import {
   Search,
   Bell,
-  Cpu,
-  Database,
   Plus,
-  Compass,
   Menu,
 } from "lucide-react";
 
@@ -20,7 +17,7 @@ interface WebTopHeaderProps {
 
 export const WebTopHeader: React.FC<WebTopHeaderProps> = ({
   title,
-  subtitle = "Autonomous Turn-by-Turn Courier Logistics",
+  subtitle = "Urban Logistics & Courier Operations",
   searchQuery,
   onSearchChange,
   onOpenCreate,
@@ -41,10 +38,6 @@ export const WebTopHeader: React.FC<WebTopHeaderProps> = ({
         <div>
           <h1 className="text-base font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
             <span>{title}</span>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live Online
-            </span>
           </h1>
           <p className="text-[11px] text-neutral-400 font-medium hidden sm:block">
             {subtitle}
@@ -66,20 +59,6 @@ export const WebTopHeader: React.FC<WebTopHeaderProps> = ({
 
       {/* Right Stats & Quick Actions */}
       <div className="flex items-center gap-3">
-        {/* System Diagnostics Badges */}
-        <div className="hidden lg:flex items-center gap-2 font-mono text-[11px]">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-600">
-            <Cpu className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Dijkstra:</span>
-            <span className="font-bold text-neutral-900">0.002ms</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-600">
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="font-bold text-neutral-900">PostgreSQL</span>
-          </div>
-        </div>
-
         <button
           onClick={onOpenCreate}
           className="flex items-center gap-1.5 px-4 py-2 bg-[#FF2D55] hover:bg-[#e0264b] active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-[#FF2D55]/20 transition-all cursor-pointer"
@@ -89,7 +68,7 @@ export const WebTopHeader: React.FC<WebTopHeaderProps> = ({
         </button>
 
         <button
-          onClick={() => alert("All 6 distribution hubs operating normally.")}
+          onClick={() => alert("Fleet and hubs operating normally.")}
           className="w-9 h-9 rounded-xl border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 active:scale-95 transition-all shadow-2xs cursor-pointer relative"
         >
           <Bell className="w-4 h-4" />

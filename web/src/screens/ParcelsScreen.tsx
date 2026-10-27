@@ -81,7 +81,7 @@ export const ParcelsScreen: React.FC<ParcelsScreenProps> = ({
             Shipments & Courier Dispatch Queue
           </h2>
           <p className="text-xs text-neutral-500 mt-1">
-            Complete database of parcels stored in PostgreSQL Supabase
+            Active dispatched shipments and real-time courier order queue
           </p>
         </div>
 

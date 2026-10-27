@@ -200,7 +200,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
                   Current Deliveries
                 </h2>
                 <p className="text-xs text-neutral-500">
-                  Real-time PostgreSQL tracking & pickup manifests
+                  Live urban shipments & active courier manifests
                 </p>
               </div>
               <button

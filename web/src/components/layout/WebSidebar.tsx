@@ -4,26 +4,31 @@ import {
   LayoutDashboard,
   Box,
   MapPin,
-  Calculator,
-  Receipt,
-  Headphones,
-  Settings,
+  Navigation,
+  Radar,
+  GitFork,
+  Repeat,
   Plus,
-  Package,
-  Activity,
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
 
-export type WebTab = "dashboard" | "parcels" | "map" | "settings";
+export type WebTab =
+  | "dashboard"
+  | "parcels"
+  | "map"
+  | "dijkstra"
+  | "bfs"
+  | "kruskal"
+  | "dfs";
 
 interface WebSidebarProps {
   activeTab: WebTab;
   onTabChange: (tab: WebTab) => void;
   onOpenCreate: () => void;
-  onOpenCalculate: () => void;
-  onOpenReceipts: () => void;
-  onOpenSupport: () => void;
+  onOpenCalculate?: () => void;
+  onOpenReceipts?: () => void;
+  onOpenSupport?: () => void;
   activeParcelCount: number;
 }
 
@@ -31,9 +36,6 @@ export const WebSidebar: React.FC<WebSidebarProps> = ({
   activeTab,
   onTabChange,
   onOpenCreate,
-  onOpenCalculate,
-  onOpenReceipts,
-  onOpenSupport,
   activeParcelCount,
 }) => {
   const primaryNav = [
@@ -53,13 +55,38 @@ export const WebSidebar: React.FC<WebSidebarProps> = ({
       id: "map" as WebTab,
       label: "Live Fleet Radar",
       icon: MapPin,
-      badge: "BFS",
+      badge: null,
+    },
+  ];
+
+  const algorithmTools = [
+    {
+      id: "dijkstra" as WebTab,
+      label: "Dijkstra Shortest Path",
+      icon: Navigation,
+      badge: "GPS",
+      color: "text-amber-400",
     },
     {
-      id: "settings" as WebTab,
-      label: "Engine & Diagnostics",
-      icon: Settings,
-      badge: "C++17",
+      id: "bfs" as WebTab,
+      label: "BFS Courier Dispatch",
+      icon: Radar,
+      badge: "Radial",
+      color: "text-emerald-400",
+    },
+    {
+      id: "kruskal" as WebTab,
+      label: "Kruskal Hub MST",
+      icon: GitFork,
+      badge: "Network",
+      color: "text-blue-400",
+    },
+    {
+      id: "dfs" as WebTab,
+      label: "DFS Cycle Detection",
+      icon: Repeat,
+      badge: "Safety",
+      color: "text-purple-400",
     },
   ];
 
@@ -114,7 +141,7 @@ export const WebSidebar: React.FC<WebSidebarProps> = ({
                       className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
                         isActive
                           ? "bg-[#FF2D55] text-white"
-                          : "bg-neutral-800 text-neutral-400"
+                          : "bg-[#FF2D55]/20 text-[#FF2D55] border border-[#FF2D55]/30"
                       }`}
                     >
                       {item.badge}
@@ -126,56 +153,51 @@ export const WebSidebar: React.FC<WebSidebarProps> = ({
           </nav>
         </div>
 
-        {/* Microservices Shortcuts */}
+        {/* 4 Core DSA Logistics Tools */}
         <div>
-          <span className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest block mb-2">
-            Logistics Tools
-          </span>
-          <div className="space-y-1">
-            <button
-              onClick={onOpenCalculate}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-all cursor-pointer"
-            >
-              <Calculator className="w-4 h-4 text-amber-400" />
-              <span>Dijkstra Rate Calc</span>
-            </button>
-
-            <button
-              onClick={onOpenReceipts}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-all cursor-pointer"
-            >
-              <Receipt className="w-4 h-4 text-blue-400" />
-              <span>Invoices & Receipts</span>
-            </button>
-
-            <button
-              onClick={onOpenSupport}
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-neutral-400 hover:text-white hover:bg-neutral-800/60 transition-all cursor-pointer"
-            >
-              <Headphones className="w-4 h-4 text-purple-400" />
-              <span>24/7 Dispatch Hotline</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Engine Status Card */}
-        <div className="p-3.5 rounded-2xl bg-neutral-800/60 border border-neutral-700/60">
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-[11px] font-bold text-neutral-300 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              Engine Health
+          <div className="px-3 flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block">
+              Logistics Tools (DSA)
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[9px] font-mono font-bold text-neutral-500">
+              C++17
+            </span>
           </div>
-          <div className="space-y-1 text-[11px] font-mono text-neutral-400">
-            <div className="flex justify-between">
-              <span>Dijkstra:</span>
-              <span className="text-white font-bold">0.002 ms</span>
-            </div>
-            <div className="flex justify-between">
-              <span>DB Sync:</span>
-              <span className="text-emerald-400 font-semibold">Postgres OK</span>
-            </div>
+
+          <div className="space-y-1">
+            {algorithmTools.map((tool) => {
+              const Icon = tool.icon;
+              const isActive = activeTab === tool.id;
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => onTabChange(tool.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-white text-neutral-900 shadow-md"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon
+                      className={`w-4 h-4 ${
+                        isActive ? "text-[#FF2D55]" : tool.color
+                      }`}
+                    />
+                    <span className="truncate">{tool.label}</span>
+                  </div>
+                  <span
+                    className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                      isActive
+                        ? "bg-neutral-900 text-white"
+                        : "bg-neutral-800 text-neutral-400"
+                    }`}
+                  >
+                    {tool.badge}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

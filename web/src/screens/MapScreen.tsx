@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DhakaLeafletMap } from "../components/map/DhakaLeafletMap";
 import { RoutingEngine } from "../engine/routing-engine";
 import type { NearbyCourier } from "../types/delivery";
-import { Radar, Star, ShieldCheck, Phone, Cpu, Navigation, ArrowRight } from "lucide-react";
+import { Radar, Star, Navigation, ArrowRight } from "lucide-react";
 
 interface MapScreenProps {
   onSelectCourier?: (courier: NearbyCourier) => void;
@@ -36,18 +36,18 @@ export const MapScreen: React.FC<MapScreenProps> = () => {
           </div>
         </div>
 
-        {/* Algorithm Diagnostics Badge */}
+        {/* Fleet Overview Badge */}
         <div className="p-4 mx-4 mt-4 rounded-2xl bg-neutral-900 text-white space-y-1.5 font-mono text-[11px]">
           <div className="flex items-center justify-between text-neutral-400 font-sans font-bold">
             <span className="flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              Engine Engine
+              <Navigation className="w-3.5 h-3.5 text-indigo-400" />
+              Active Couriers
             </span>
-            <span className="text-emerald-400 font-mono">0.002 ms</span>
+            <span className="text-emerald-400 font-mono font-bold">{couriers.length} Online</span>
           </div>
           <div className="flex justify-between text-neutral-300">
-            <span>Dijkstra Shortest Path:</span>
-            <span className="text-white font-bold">1.5 mi (10 min)</span>
+            <span>Coverage Zone:</span>
+            <span className="text-white font-bold">Dhaka Metro Area</span>
           </div>
         </div>
 

@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { WebSidebar, WebTab } from "./components/layout/WebSidebar";
 import { WebTopHeader } from "./components/layout/WebTopHeader";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { ParcelsScreen } from "./screens/ParcelsScreen";
 import { MapScreen } from "./screens/MapScreen";
-import { SettingsScreen } from "./screens/SettingsScreen";
 import { OrderDetailsScreen } from "./screens/OrderDetailsScreen";
 import { DriverNavigationScreen } from "./screens/DriverNavigationScreen";
+import { AlgorithmLabScreen, AlgorithmType } from "./screens/AlgorithmLabScreen";
 
 import { CreateParcelModal } from "./components/modals/CreateParcelModal";
 import { ShippingCalculatorModal } from "./components/modals/ShippingCalculatorModal";
 import { ReceiptsModal } from "./components/modals/ReceiptsModal";
 import { SupportModal } from "./components/modals/SupportModal";
+import { fetchParcelsFromDB } from "./db/parcels";
 import type { DeliveryItem } from "./types/delivery";
 
 export const App: React.FC = () => {
@@ -21,12 +22,26 @@ export const App: React.FC = () => {
   const [globalSearch, setGlobalSearch] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [activeParcelCount, setActiveParcelCount] = useState<number>(3);
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCalculateOpen, setIsCalculateOpen] = useState(false);
   const [isReceiptsOpen, setIsReceiptsOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+
+  // Fetch real-time active parcel count from database / local storage
+  useEffect(() => {
+    let mounted = true;
+    fetchParcelsFromDB().then((res) => {
+      if (mounted) {
+        setActiveParcelCount(res.active.length);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [refreshTrigger]);
 
   const handleSelectParcel = (id: string) => {
     setSelectedOrderId(id);
@@ -45,7 +60,7 @@ export const App: React.FC = () => {
   };
 
   const handleParcelCreated = (_newParcel: DeliveryItem) => {
-    setActiveTab("dashboard");
+    setActiveTab("parcels");
     setIsCreateOpen(false);
     setRefreshTrigger((k) => k + 1);
   };
@@ -60,8 +75,14 @@ export const App: React.FC = () => {
         return "Shipments & Booking Queue";
       case "map":
         return "Dhaka Fleet Radar";
-      case "settings":
-        return "C++17 Engine Diagnostics";
+      case "dijkstra":
+        return "Dijkstra Shortest Path Engine";
+      case "bfs":
+        return "BFS Concentric Courier Dispatch";
+      case "kruskal":
+        return "Kruskal Warehouse Hub MST Network";
+      case "dfs":
+        return "DFS Route Safety & Cycle Detection";
       default:
         return "Trive Logistics Hub";
     }
@@ -82,7 +103,7 @@ export const App: React.FC = () => {
           onOpenCalculate={() => setIsCalculateOpen(true)}
           onOpenReceipts={() => setIsReceiptsOpen(true)}
           onOpenSupport={() => setIsSupportOpen(true)}
-          activeParcelCount={3}
+          activeParcelCount={activeParcelCount}
         />
       </div>
 
@@ -137,7 +158,15 @@ export const App: React.FC = () => {
 
               {activeTab === "map" && <MapScreen />}
 
-              {activeTab === "settings" && <SettingsScreen />}
+              {(activeTab === "dijkstra" ||
+                activeTab === "bfs" ||
+                activeTab === "kruskal" ||
+                activeTab === "dfs") && (
+                <AlgorithmLabScreen
+                  key={activeTab}
+                  initialAlgorithm={activeTab as AlgorithmType}
+                />
+              )}
             </>
           )}
         </main>
