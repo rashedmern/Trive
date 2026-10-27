@@ -157,10 +157,7 @@ export const WebSidebar: React.FC<WebSidebarProps> = ({
         <div>
           <div className="px-3 flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest block">
-              Logistics Tools (DSA)
-            </span>
-            <span className="text-[9px] font-mono font-bold text-neutral-500">
-              C++17
+              Logistics Tools
             </span>
           </div>
 
