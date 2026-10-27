@@ -34,10 +34,10 @@ const createIcon = (bg: string, emoji: string, size = 32) =>
     iconAnchor: [size / 2, size / 2],
   });
 
-const nodePin = createIcon("#1E293B", "📍", 26);
-const activeNodePin = createIcon("#FF2D55", "📍", 32);
-const startPin = createIcon("#10B981", "🟢", 30);
-const destPin = createIcon("#FF2D55", "🏁", 30);
+const nodePin = createIcon("#1E293B", "📍", 24);
+const activeNodePin = createIcon("#FF2D55", "📍", 28);
+const startPin = createIcon("#10B981", "📦", 34);
+const destPin = createIcon("#FF2D55", "📍", 36);
 const courierPin = createIcon("#3B82F6", "🛵", 28);
 const dispatchedCourierPin = createIcon("#10B981", "✅", 32);
 const hubPin = createIcon("#6366F1", "🏬", 28);
@@ -693,9 +693,9 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
                         <p className="font-bold text-neutral-900">{node.name}</p>
                         <p className="text-[11px] text-neutral-500 font-mono mt-0.5">
                           {isStart
-                            ? "🟢 Start Origin"
+                            ? "📦 Parcel Pickup Point"
                             : isEnd
-                            ? "🏁 Destination"
+                            ? "📍 Delivery End Point"
                             : isOnPath
                             ? "✨ Shortest Path Node"
                             : "Graph Intersection"}
