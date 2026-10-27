@@ -110,7 +110,6 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
   // BFS STATE
   const [bfsOrigin, setBfsOrigin] = useState<string>("dhanmondi");
   const [bfsRadiusHops, setBfsRadiusHops] = useState<number>(1);
-  const [bfsQueueLog, setBfsQueueLog] = useState<string[]>([]);
   const [bfsMatchedCourier, setBfsMatchedCourier] = useState<typeof SIMULATED_COURIERS[0] | null>(null);
   const [bfsRunning, setBfsRunning] = useState(false);
 
@@ -119,12 +118,10 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
   const [kruskalRejectedEdges, setKruskalRejectedEdges] = useState<typeof HUB_CANDIDATE_EDGES>([]);
   const [kruskalTotalCost, setKruskalTotalCost] = useState<number>(0);
   const [kruskalRunning, setKruskalRunning] = useState(false);
-  const [kruskalLog, setKruskalLog] = useState<string[]>([]);
 
   // DFS STATE
   const [dfsPreset, setDfsPreset] = useState<"safe" | "cycle">("cycle");
   const [dfsRunning, setDfsRunning] = useState(false);
-  const [dfsStackLog, setDfsStackLog] = useState<string[]>([]);
   const [dfsHasCycle, setDfsHasCycle] = useState<boolean | null>(null);
   const [dfsCycleNodes, setDfsCycleNodes] = useState<string[]>([]);
 
@@ -223,21 +220,7 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
   // 2. BFS SOLVER IMPLEMENTATION
   const runBfsSolver = () => {
     setBfsRunning(true);
-    const logs: string[] = [];
-    logs.push(`Enqueued Origin: ${bfsOrigin.toUpperCase()} [Level 0, dist = 0 km]`);
-
     const matched = SIMULATED_COURIERS.find((c) => c.hopsFromDhanmondi <= bfsRadiusHops) || SIMULATED_COURIERS[0];
-    
-    logs.push(`Level 1 Search (R <= 2.5km): Exploring Farmgate & Tejgaon...`);
-    if (bfsRadiusHops >= 2) {
-      logs.push(`Level 2 Search (R <= 5.0km): Exploring Mohakhali & Agargaon...`);
-    }
-    if (bfsRadiusHops >= 3) {
-      logs.push(`Level 3 Search (R <= 7.5km): Exploring Gulshan & Banani...`);
-    }
-    logs.push(`Target Located: ${matched.name} at Node [${matched.node.toUpperCase()}], Hops: ${matched.hopsFromDhanmondi}, ETA: ${matched.eta}`);
-
-    setBfsQueueLog(logs);
     setBfsMatchedCourier(matched);
     setBfsRunning(false);
   };
@@ -264,53 +247,31 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
 
     const mst: typeof HUB_CANDIDATE_EDGES = [];
     const rejected: typeof HUB_CANDIDATE_EDGES = [];
-    const logs: string[] = [];
     let cost = 0;
 
     for (const edge of sorted) {
       if (unite(edge.u, edge.v)) {
         mst.push(edge);
         cost += edge.cost;
-        logs.push(`ACCEPTED: ${edge.u} <-> ${edge.v} (${edge.cost} km via ${edge.street})`);
         if (mst.length === DHAKA_HUBS.length - 1) break;
       } else {
         rejected.push(edge);
-        logs.push(`REJECTED: ${edge.u} <-> ${edge.v} (${edge.cost} km) - Cycle Prevented`);
       }
     }
 
     setKruskalMstEdges(mst);
     setKruskalRejectedEdges(rejected);
     setKruskalTotalCost(Number(cost.toFixed(1)));
-    setKruskalLog(logs);
     setKruskalRunning(false);
   };
 
   // 4. DFS CYCLE DETECTOR IMPLEMENTATION
   const runDfsSolver = () => {
     setDfsRunning(true);
-    const stack: string[] = [];
-
     if (dfsPreset === "cycle") {
-      stack.push("DFS Visit: Root [Banani Fulfillment]");
-      stack.push("  -> Recurse: [Gulshan Express Hub]");
-      stack.push("    -> Recurse: [Mohakhali Terminal]");
-      stack.push("      -> Outgoing edge: [Mohakhali -> Banani]");
-      stack.push("      BACK-EDGE DETECTED: Banani is currently visiting in stack");
-      stack.push("CYCLIC LOCK: Courier route contains a closed loop");
-
-      setDfsStackLog(stack);
       setDfsHasCycle(true);
       setDfsCycleNodes(["banani", "gulshan", "mohakhali"]);
     } else {
-      stack.push("DFS Visit: Root [Uttara Depot]");
-      stack.push("  -> Recurse: [Banani Fulfillment]");
-      stack.push("    -> Recurse: [Mohakhali Terminal]");
-      stack.push("      -> Recurse: [Tejgaon Freight Depot]");
-      stack.push("        -> Recurse: [Dhanmondi Central Hub]");
-      stack.push("DFS Complete: Directed Acyclic Route with zero circular locks.");
-
-      setDfsStackLog(stack);
       setDfsHasCycle(false);
       setDfsCycleNodes([]);
     }
@@ -555,20 +516,6 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* BFS Queue Progression Trace */}
-              <div>
-                <span className="text-xs font-bold text-neutral-700 block mb-2">
-                  FIFO Queue Execution Trace:
-                </span>
-                <div className="space-y-1.5 font-mono text-[10px] bg-neutral-900 text-neutral-200 p-3 rounded-xl max-h-48 overflow-y-auto">
-                  {bfsQueueLog.map((log, idx) => (
-                    <div key={idx} className="leading-relaxed">
-                      {log}
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
@@ -619,29 +566,6 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
                   <span className="text-[10px] text-neutral-400 block">
                     vs Full Mesh (38.5 km)
                   </span>
-                </div>
-              </div>
-
-              {/* DSU Decision Trace */}
-              <div>
-                <span className="text-xs font-bold text-neutral-700 block mb-2">
-                  Edge Selections & Cycle Checks:
-                </span>
-                <div className="space-y-1.5 font-mono text-[10px] bg-neutral-900 text-neutral-200 p-3 rounded-xl max-h-48 overflow-y-auto">
-                  {kruskalLog.map((log, idx) => (
-                    <div
-                      key={idx}
-                      className={
-                        log.startsWith("ACCEPTED")
-                          ? "text-emerald-400"
-                          : log.startsWith("REJECTED")
-                          ? "text-rose-400"
-                          : "text-neutral-400"
-                      }
-                    >
-                      {log}
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
@@ -721,29 +645,6 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* DFS Call Stack Trace */}
-              <div>
-                <span className="text-xs font-bold text-neutral-700 block mb-2">
-                  Recursion Call Stack Trace:
-                </span>
-                <div className="space-y-1.5 font-mono text-[10px] bg-neutral-900 text-neutral-200 p-3 rounded-xl max-h-48 overflow-y-auto">
-                  {dfsStackLog.map((log, idx) => (
-                    <div
-                      key={idx}
-                      className={
-                        log.includes("BACK-EDGE")
-                          ? "text-rose-400 font-bold"
-                          : log.includes("Complete")
-                          ? "text-emerald-400 font-bold"
-                          : "text-neutral-300"
-                      }
-                    >
-                      {log}
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
         </div>
