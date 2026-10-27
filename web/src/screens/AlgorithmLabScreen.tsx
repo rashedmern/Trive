@@ -418,28 +418,6 @@ export const AlgorithmLabScreen: React.FC<AlgorithmLabScreenProps> = ({
                   </span>
                 </div>
               </div>
-
-              {/* Path Nodes List */}
-              <div>
-                <span className="text-xs font-bold text-neutral-700 block mb-2">
-                  Optimal Road Sequence ({dijkstraPath.length} Intersections):
-                </span>
-                <div className="space-y-1.5 font-mono text-[11px]">
-                  {dijkstraPath.map((id, idx) => (
-                    <div
-                      key={id}
-                      className="flex items-center gap-2 p-2 rounded-lg bg-neutral-50 border border-neutral-200"
-                    >
-                      <span className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="font-semibold text-neutral-800 truncate">
-                        {DHAKA_NODES[id]?.name || id}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
